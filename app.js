@@ -1,55 +1,33 @@
-// Include api for currency change
-const api = "https://v6.exchangerate-api.com/v6/fce7d282c9ae40c63133cdc1/latest/USD";
-// For selecting different controls
-let search = document.querySelector(".searchBox");
-let convert = document.querySelector(".convert");
-let fromCurrecy = document.querySelector(".from");
-let toCurrecy = document.querySelector(".to");
-let finalValue = document.querySelector(".finalValue");
-let finalAmount = document.getElementById("finalAmount");
-let resultFrom;
-let resultTo;
-let searchValue;
- 
-// Event when currency is changed
-fromCurrecy.addEventListener('change', (event) => {
-    resultFrom = `${event.target.value}`;
+var select = document.querySelectorAll(".currency"),
+input_currency = document.getElementById('input_currency'),
+output_currency = document.getElementById('output_currency');
+const btn = document.querySelector(".btn");
+
+fetch(`https://api.frankfurter.app/currencies`)
+  .then((data) => data.json())
+  .then((data) => {
+    const entries = Object.entries(data);
+    console.log(data)
+	  for (var i = 0; i < entries.length; i++) {
+	    select[0].innerHTML += `<option value="${entries[i][0]}">${entries[i][0]}</option>`;
+	    select[1].innerHTML += `<option value="${entries[i][0]}">${entries[i][0]}</option>`;
+	  }
+   	
 });
- 
-// Event when currency is changed
-toCurrecy.addEventListener('change', (event) => {
-    resultTo = `${event.target.value}`;
-});
- 
-search.addEventListener('input', updateValue);
- 
-// Function for updating value
-function updateValue(e) {
-    searchValue = e.target.value;
+
+btn.addEventListener("click",convert)
+
+function convert(){
+ 	input_currency_val = input_currency.value;
+ 	if(select[0].value != select[1].value ){
+ 		const host = 'api.frankfurter.app';
+		fetch(`https://${host}/latest?amount=${input_currency_val}&from=${select[0].value}&to=${select[1].value}`)
+		  .then((val) => val.json())
+    	.then((val) => {
+		    output_currency.value = Object.values(val.rates)[0]
+		    console.log(Object.values(val.rates)[0])
+		});
+ 	}else{
+ 		alert("Peease select two different currencies")
+ 	}
 }
- 
-// When user clicks, it calls function getresults 
-convert.addEventListener("click", getResults);
- 
-// Function getresults
-function getResults() {
-    fetch(`${api}`)
-        .then(currency => {
-            return currency.json();
-        }).then(displayResults);
-}
- 
-// Display results after conversion
-function displayResults(currency) {
-    let fromRate = currency.rates[resultFrom];
-    let toRate = currency.rates[resultTo];
-    finalValue.innerHTML =
-        ((toRate / fromRate) * searchValue).toFixed(2);
-    finalAmount.style.display = "block";
-}
- 
-// When user click on reset button
-function clearVal() {
-    window.location.reload();
-    document.getElementsByClassName("finalValue").innerHTML = "";
-};
